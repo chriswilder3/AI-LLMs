@@ -30,13 +30,20 @@ async def generate_response(prompt):
         return f"An error occured : {e}"
     
 async def main():
-    user_prompt = "Explain why droplets are round in a way a 5 year old understands"
-    print("generating response for : ", user_prompt)
-
-    response = await generate_response(user_prompt)
-
-    print(" -------LLM Response-----")
-    print(response)
+    user_question :str  = "why are stars round"
+    
+    
+    while True:
+        user_question = input(" Enter your Question : ")
+        user_prompt = f"Explain  {user_question} in a way a 5 year old understands"
+        response = await generate_response(user_prompt)
+        # print("generating response for : ", user_prompt)
+        print(" -------LLM Response-----")
+        print(response)
+        runAgain = input("\n Press y to ask again, n to exit")
+        if runAgain != 'y':
+            break
+    print("---Exit---")
 
 if __name__ == "__main__":
     asyncio.run(main())
