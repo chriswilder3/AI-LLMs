@@ -1,13 +1,19 @@
 import openai
 import os
 import asyncio
+from dotenv import load_dotenv
 
-# openai.api_key =  os.environ['OPENAI_API_KEY']
+load_dotenv()
+
+client = openai.AsyncOpenAI(
+    api_key= os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
+)
 
 async def generate_response(prompt):
     try:
-        response = await openai.AsyncOpenAI().chat.completions.create(
-            model = "gpt-4.1-nano",
+        response = await client.chat.completions.create(
+            model = "gpt-oss-120b:free",
             messages = [
                 {
                     "role":"system",
