@@ -1,17 +1,22 @@
-import openai
+from openai import AsyncOpenAI
 import os
 import asyncio
+from dotenv import load_dotenv
 
-# openai.api_key =  os.environ['OPENAI_API_KEY']
+load_dotenv()
+
+client = AsyncOpenAI( 
+            api_key =  os.getenv("OPENAI_API_KEY")
+        )
 
 async def generate_response(prompt):
     try:
-        response = await openai.AsyncOpenAI().chat.completions.create(
-            model = "gpt-4.1-nano",
+        response = await client.chat.completions.create(
+            model = "gpt-5-nano",
             messages = [
                 {
                     "role":"system",
-                    "content":"You are a helpful assistant"
+                    "content":"You are a helpful assistant."
                 },
                 {
                     "role":"user",
@@ -29,7 +34,7 @@ async def main():
     
     while True:
         user_question = input(" Enter your Question : ")
-        user_prompt = f"Explain  {user_question} in a way a 5 year old understands"
+        user_prompt = f"Explain  {user_question} like for 5 year old"
         response = await generate_response(user_prompt)
         # print("generating response for : ", user_prompt)
         print(" -------LLM Response-----")
