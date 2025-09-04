@@ -1,5 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+# from langchain_core.callbacks import get_usage_metadata_callback
+from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 import os 
 
@@ -28,11 +30,17 @@ prompt = ChatPromptTemplate.from_messages(
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 
 agent = create_tool_calling_agent(llm = llm,tools = tools, prompt= prompt)
-agent_executor = AgentExecutor(agent = agent, tools = tools )
-
+agent_executor = AgentExecutor(agent = agent, tools = tools, verbose= True )
+# setting verbose allows seeing agent thought process
+ 
 user_input = input("Enter a topic : ")
 
-response = agent_executor.invoke({"input":user_input})
-# response is dict with 2 entries {'input': .., 'output': ..}
+print(" Agent's thought process")
 
-print("---LLM response--- \n",response['output'])
+with get_openai_callback() as cb:
+    response = agent_executor.invoke({"input":user_input})
+    # response is dict with 2 entries {'input': .., 'output': ..}
+
+    print("---LLM response--- \n",response['output'])
+
+    print(cb)
