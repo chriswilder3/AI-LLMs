@@ -29,8 +29,6 @@ print(chat_history.messages)
 # Chain 
 chain = prompt | llm
 
-
-
 while True:
     user_input = input("Ask AI Question : ")
     chat_history.add_user_message(user_input)
