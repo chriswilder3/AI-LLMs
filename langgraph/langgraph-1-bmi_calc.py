@@ -20,7 +20,7 @@ class BMIState(TypedDict):
 
 # Runnable/functions (nodes)
 def calculate_bmi(state :BMIState) -> BMIState:
-    bmi = round(weight /  ((height)**2),2)
+    bmi = round(state["weight"] /  ((state["height"])**2),2)
     state["bmi"] = bmi
     return state
  
