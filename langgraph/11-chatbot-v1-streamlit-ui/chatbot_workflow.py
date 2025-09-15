@@ -25,9 +25,10 @@ class ChatState(TypedDict):
 
 # Nodes(functions)
 def chat_node(state : ChatState) -> ChatState:
-    messages = state["messages"]
-    response = llm.invoke(messages)
-    return {"messages": [AIMessage(response.content)]}
+    # response = llm.invoke(state["message"])
+    # return {"messages": [AIMessage(response.content)]}
+    for chunk in llm.stream(state["messages"]):
+        yield {"messages": [AIMessage(chunk.content)]}
 
 def create_chatbot():
     # Graph       
@@ -42,16 +43,29 @@ def create_chatbot():
     return chatbot_workflow
 
 def main():
-    init_state = {
-        "messages" : [HumanMessage("What is capital of India? ")]
-    }
-    
+    # Keep the creation outside the loop otherwise, new workflow
+    # created everytime and hence persistance fails
     workflow = create_chatbot()
     # config needed since checkpoint active
     config1 = {"configurable":{"thread_id":1}}
-    final_state = workflow.invoke(init_state, config=config1)
-    print(final_state["messages"][-1].content)
 
+    while True:
+        user_input = input("Ask something : ")
+        if user_input in ["exit","q"]:
+            break
+
+        init_state = {
+            "messages" : [HumanMessage(user_input)]
+        }
+        # final_state = workflow.invoke(init_state, config=config1)
+        # print(final_state["messages"][-1].content)
+        generator_obj = workflow.stream(init_state, config= config1,
+                                            stream_mode="messages")
+        for chunk, metadata in generator_obj:
+            if chunk.content:
+                print(chunk.content, end="|",flush= True)
+        print("\n")
+    
 if __name__ == "__main__":
     main()
 
