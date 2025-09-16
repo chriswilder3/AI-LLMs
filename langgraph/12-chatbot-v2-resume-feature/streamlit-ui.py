@@ -25,16 +25,30 @@ def switch_chat(thread_id):
     #                              .values["messages"]]
 
     messages = []
-    for x in chatbot.get_state(config= config1).values["messages"]:
+    chat_state = chatbot.get_state(config= config1).values
+    for x in chat_state.get("messages", []):
         if isinstance(x, HumanMessage):
             role="user"
         elif isinstance(x, AIMessage):
             role="ai"
+        else:
+            continue
         messages.append({"role":role, "content": x.content})
-    print(messages)
-    print(chatbot.get_state(config= config1).values["messages"])
+    # print(messages)
+    # print(chatbot.get_state(config= config1).values["messages"])
     st.session_state.messages = messages
-    
+    st.rerun()
+
+def change_thread_name(prompt):
+    thread_id = st.session_state.thread_id
+    if len(prompt) > 15:
+        prompt = prompt[:15]
+    if len(st.session_state.messages) <3:
+        st.session_state.thread_id = prompt
+        for i in range(len(st.session_state.thread_list)):
+            if st.session_state.thread_list[i] == thread_id:
+                st.session_state.thread_list[i] = prompt
+        
 #********************* Initializations  **********************
 
 if "chatbot" not in st.session_state:
@@ -55,9 +69,20 @@ with st.sidebar:
     if st.button("new chat +"):
         create_new_chat()
     st.header("My Conversations")
-    for thread_id in st.session_state["thread_list"]:
-        if st.button(str(thread_id)):
+
+    selected_thread = st.session_state.get("thread_id", None)
+
+    for thread_id in st.session_state["thread_list"][::-1]:
+        if st.button(str(thread_id), type="primary" if thread_id == selected_thread else "secondary"):
             switch_chat(thread_id)
+
+    # for thread_id in st.session_state["thread_list"]:
+    #     if thread_id == st.session_state.thread_id:
+    #         if st.button(str(thread_id), type="primary"):
+    #             switch_chat(thread_id)
+    #     else:
+    #         if st.button(str(thread_id), type="secondary"):
+    #             switch_chat(thread_id)
 
 #*********************  Display Messages  *******************
 
@@ -82,7 +107,6 @@ if prompt := st.chat_input("Ask something : "):
         config={"configurable":{"thread_id":st.session_state.thread_id}}, 
         stream_mode="messages")
     
-    response = ""
     # We can use streamlit's write_stream(generator_obj) 
     with st.chat_message("ai"):
         response = st.write_stream(
@@ -90,6 +114,8 @@ if prompt := st.chat_input("Ask something : "):
         )
     print("AI RESP : ", response)
     st.session_state.messages.append({"role":"ai","content":response})
+
+    # change_thread_name(prompt)
 
     # with st.chat_message("ai"):
     #     placeholder = st.empty()

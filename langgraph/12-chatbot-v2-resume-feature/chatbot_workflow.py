@@ -26,7 +26,7 @@ class ChatState(TypedDict):
 # Nodes(functions)
 def chat_node(state : ChatState) -> ChatState:
     response = llm.invoke(state["messages"])
-    return {"messages": [AIMessage(content= response.content)]}
+    return {"messages": [response]}
     # for chunk in llm.stream(state["messages"]): 
     #     yield {"messages": [AIMessage(chunk.content)]}
     # response = ""
